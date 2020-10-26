@@ -17,7 +17,7 @@ $(PROG): $(OBJS)
 $(PROG).exe: $(PROG)
 	cp $(PROG) $(PROG).exe
 
-hid.o: hid_$(OS).c hid.h
+hid.o: hid_LINUX.c hid.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:

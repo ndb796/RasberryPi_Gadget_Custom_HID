@@ -104,7 +104,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
             for (i = 0; i < dev->config->bNumInterfaces && iface; i++, iface++) {
                 desc = iface->altsetting;
                 if (!desc) continue;
-                printf("interface #%d: class=%d, subclass=%d, protocol=%d\n",
+                printf("interface #%d: class = %d, subclass = %d, protocol = %d\n",
                     i,
                     desc->bInterfaceClass,
                     desc->bInterfaceSubClass,
@@ -123,7 +123,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                         printf("IN endpoint number: %d\n", ep_in);
                     } else {
                         if (!ep_out) ep_out = ep->bEndpointAddress;
-                        printf("OUT endpoint %d\n", ep_out);
+                        printf("OUT endpoint: %d\n", ep_out);
                     }
                 }
                 if (!ep_in) continue;
@@ -162,6 +162,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                 // 사전에 설정한 Usage Page 및 Usage ID와 일치하는지 확인
                 parsed_usage_page = buf[0] + (buf[1] << 8);
                 parsed_usage = buf[2] + (buf[3] << 8);
+                printf("parsed usage page = %d, parsed usage ID = %d\n", parsed_usage_page, parsed_usage);
                 if ((!parsed_usage_page) || (!parsed_usage) ||
                     (usage_page > 0 && parsed_usage_page != usage_page) || 
                     (usage > 0 && parsed_usage != usage)) {

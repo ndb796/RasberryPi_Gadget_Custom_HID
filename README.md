@@ -1,6 +1,6 @@
-### Rasberry Pi Zero W - Gadget Custom HID
+### Raspberry Pi Zero W - Gadget Custom HID
 
-* Host PC transfers a data to the SD card of Raspberry Pi Zero W using custom HID program.
+* Host PC transfers data to the SD card of Raspberry Pi Zero W using custom HID program.
 
 #### Host PC
 
@@ -8,4 +8,4 @@
 
 #### USB Device (Guest)
 
-* Rasberry Pi Zero W
+* Raspberry Pi Zero W

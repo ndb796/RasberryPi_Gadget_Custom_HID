@@ -5,7 +5,7 @@
 
 #include "hid.h"
 
-// ¿­¸° ¸ğµç HID ±â±â¸¦ °ü¸®ÇÏ±â À§ÇÑ ¿¬°á ¸®½ºÆ®
+// ì—´ë¦° ëª¨ë“  HID ê¸°ê¸°ë¥¼ ê´€ë¦¬í•˜ê¸° ìœ„í•œ ì—°ê²° ë¦¬ìŠ¤íŠ¸
 typedef struct hid_struct hid_t;
 static hid_t *first_hid = NULL;
 static hid_t *last_hid = NULL;
@@ -19,16 +19,15 @@ struct hid_struct {
     struct hid_struct *next;
 };
 
-// º» ÆÄÀÏ ¾È¿¡¼­¸¸ »ç¿ëµÇ´Â private functionµé
+// ë³¸ íŒŒì¼ ì•ˆì—ì„œë§Œ ì‚¬ìš©ë˜ëŠ” private functionë“¤
 static void add_hid(hid_t *h);
 static hid_t * get_hid(int num);
 static void free_all_hid(void);
 static void hid_close(hid_t *hid);
-static int hid_parse_item(uint32_t *val, uint8_t **data, const uint8_t *end);
 
-// rawhid_recv(): USB ÆĞÅ¶ ÀĞ±â ÇÔ¼ö
-// ÀÔ·Â: USB ±â±â ¹øÈ£, ¹öÆÛ, ¹öÆÛ Å©±â, Å¸ÀÓ¾Æ¿ô
-// Ãâ·Â: Àü´Ş ¹ŞÀº ÆĞÅ¶ Å©±â (¿À·ù: -1)
+// rawhid_recv(): USB íŒ¨í‚· ì½ê¸° í•¨ìˆ˜
+// ì…ë ¥: USB ê¸°ê¸° ë²ˆí˜¸, ë²„í¼, ë²„í¼ í¬ê¸°, íƒ€ì„ì•„ì›ƒ
+// ì¶œë ¥: ì „ë‹¬ ë°›ì€ íŒ¨í‚· í¬ê¸° (ì˜¤ë¥˜: -1)
 int rawhid_recv(int num, void *buf, int len, int timeout)
 {
     hid_t *hid;
@@ -37,16 +36,16 @@ int rawhid_recv(int num, void *buf, int len, int timeout)
     hid = get_hid(num);
     if (!hid || !hid->open) return -1;
     
-    // ¸®´ª½º usb.h Çì´õ¿¡ ±¸ÇöµÇ¾î ÀÖ´Â usb_interrupt_read() ÇÔ¼ö »ç¿ë
+    // ë¦¬ëˆ…ìŠ¤ usb.h í—¤ë”ì— êµ¬í˜„ë˜ì–´ ìˆëŠ” usb_interrupt_read() í•¨ìˆ˜ ì‚¬ìš©
     r = usb_interrupt_read(hid->usb, hid->ep_in, buf, len, timeout);
     if (r >= 0) return r;
     if (r == -110) return 0; // timeout
     return -1;
 }
 
-// rawhid_send(): USB ÆĞÅ¶ Àü¼Û ÇÔ¼ö
-// ÀÔ·Â: USB ±â±â ¹øÈ£, ¹öÆÛ, ¹öÆÛ Å©±â, Å¸ÀÓ¾Æ¿ô
-// Ãâ·Â: Àü¼ÛÇÑ ÆĞÅ¶ Å©±â (¿À·ù: -1)
+// rawhid_send(): USB íŒ¨í‚· ì „ì†¡ í•¨ìˆ˜
+// ì…ë ¥: USB ê¸°ê¸° ë²ˆí˜¸, ë²„í¼, ë²„í¼ í¬ê¸°, íƒ€ì„ì•„ì›ƒ
+// ì¶œë ¥: ì „ì†¡í•œ íŒ¨í‚· í¬ê¸° (ì˜¤ë¥˜: -1)
 int rawhid_send(int num, void *buf, int len, int timeout)
 {
     hid_t *hid;
@@ -55,16 +54,16 @@ int rawhid_send(int num, void *buf, int len, int timeout)
     if (!hid || !hid->open) return -1;
 
     if (hid->ep_out) {
-        // ¸®´ª½º usb.h Çì´õ¿¡ ±¸ÇöµÇ¾î ÀÖ´Â usb_interrupt_write() ÇÔ¼ö »ç¿ë
+        // ë¦¬ëˆ…ìŠ¤ usb.h í—¤ë”ì— êµ¬í˜„ë˜ì–´ ìˆëŠ” usb_interrupt_write() í•¨ìˆ˜ ì‚¬ìš©
         return usb_interrupt_write(hid->usb, hid->ep_out, buf, len, timeout);
     } else {
         return usb_control_msg(hid->usb, 0x21, 9, 0, hid->iface, buf, len, timeout);
     }
 }
 
-// rawhid_open(): HID ±â±â ¿©´Â ÇÔ¼ö
-// ÀÔ·Â: ÃÖ´ë ±â±â °³¼ö, Vendor ID (¾Æ¹«°Å³ª: -1), Product ID (¾Æ¹«°Å³ª: -1), Usage Page (¾Æ¹«°Å³ª: -1), Usage (¾Æ¹«°Å³ª: -1)
-// Ãâ·Â: ¿­¸° HID ±â±â °³¼ö
+// rawhid_open(): HID ê¸°ê¸° ì—¬ëŠ” í•¨ìˆ˜
+// ì…ë ¥: ìµœëŒ€ ê¸°ê¸° ê°œìˆ˜, Vendor ID (ì•„ë¬´ê±°ë‚˜: -1), Product ID (ì•„ë¬´ê±°ë‚˜: -1), Usage Page (ì•„ë¬´ê±°ë‚˜: -1), Usage (ì•„ë¬´ê±°ë‚˜: -1)
+// ì¶œë ¥: ì—´ë¦° HID ê¸°ê¸° ê°œìˆ˜
 int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
 {
     struct usb_bus *bus;
@@ -74,9 +73,9 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
     struct usb_endpoint_descriptor *ep;
 
     usb_dev_handle *u;
-    uint8_t buf[1024], *p;
-    int i, n, len, tag, ep_in, ep_out, count = 0, claimed;
-    uint32_t val = 0, parsed_usage, parsed_usage_page;
+    uint8_t buf[1024];
+    int i, n, len, ep_in, ep_out, count = 0, claimed;
+    uint32_t parsed_usage, parsed_usage_page;
     hid_t *hid;
 
     if (first_hid) free_all_hid();
@@ -87,9 +86,9 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
     usb_find_devices();
 
     for (bus = usb_get_busses(); bus; bus = bus->next) {
-        // ¿¬°áµÇ¾î ÀÖ´Â ¸ğµç USB ÀåÄ¡¸¦ ÇÏ³ª¾¿ È®ÀÎÇÏ¸ç
+        // ì—°ê²°ë˜ì–´ ìˆëŠ” ëª¨ë“  USB ì¥ì¹˜ë¥¼ í•˜ë‚˜ì”© í™•ì¸í•˜ë©°
         for (dev = bus->devices; dev; dev = dev->next) {
-            // ¼³Á¤ÇÑ Vendor ID¿Í Product ID¸¦ °¡Áö´Â ÀåÄ¡¸¦ Ã£±â
+            // ì„¤ì •í•œ Vendor IDì™€ Product IDë¥¼ ê°€ì§€ëŠ” ì¥ì¹˜ë¥¼ ì°¾ê¸°
             if (vid > 0 && dev->descriptor.idVendor != vid) continue;
             if (pid > 0 && dev->descriptor.idProduct != pid) continue;
             if (!dev->config) continue;
@@ -101,7 +100,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
             iface = dev->config->interface;
             u = NULL;
             claimed = 0;
-            // ÇöÀç ±â±âÀÇ ¸ğµç ÀÎÅÍÆäÀÌ½º(interface)¸¦ È®ÀÎÇÏ¸ç
+            // í˜„ì¬ ê¸°ê¸°ì˜ ëª¨ë“  ì¸í„°í˜ì´ìŠ¤(interface)ë¥¼ í™•ì¸í•˜ë©°
             for (i = 0; i < dev->config->bNumInterfaces && iface; i++, iface++) {
                 desc = iface->altsetting;
                 if (!desc) continue;
@@ -110,14 +109,14 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                     desc->bInterfaceClass,
                     desc->bInterfaceSubClass,
                     desc->bInterfaceProtocol);
-                // ¹Ì¸® Á¤ÀÇÇÑ HID descriptor¿Í ÀÏÄ¡ÇÏ´Â °æ¿ì¿¡¸¸ Ã³¸®
+                // ë¯¸ë¦¬ ì •ì˜í•œ HID descriptorì™€ ì¼ì¹˜í•˜ëŠ” ê²½ìš°ì—ë§Œ ì²˜ë¦¬
                 if (desc->bInterfaceClass != 3) continue;
                 if (desc->bInterfaceSubClass != 0) continue;
                 if (desc->bInterfaceProtocol != 0) continue;
 
                 ep = desc->endpoint;
                 ep_in = ep_out = 0;
-                // ÇØ´ç HID ÀÎÅÍÆäÀÌ½ºÀÇ ¸ğµç ¿£µåÆ÷ÀÎÆ®(endpoint)¸¦ È®ÀÎÇÏ¸ç
+                // í•´ë‹¹ HID ì¸í„°í˜ì´ìŠ¤ì˜ ëª¨ë“  ì—”ë“œí¬ì¸íŠ¸(endpoint)ë¥¼ í™•ì¸í•˜ë©°
                 for (n = 0; n < desc->bNumEndpoints; n++, ep++) {
                     if (ep->bEndpointAddress & 0x80) {
                         if (!ep_in) ep_in = ep->bEndpointAddress & 0x7F;
@@ -129,7 +128,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                 }
                 if (!ep_in) continue;
                 
-                // ¸®´ª½º usb.h Çì´õ¿¡ ±¸ÇöµÇ¾î ÀÖ´Â usb_open() ÇÔ¼ö »ç¿ë 
+                // ë¦¬ëˆ…ìŠ¤ usb.h í—¤ë”ì— êµ¬í˜„ë˜ì–´ ìˆëŠ” usb_open() í•¨ìˆ˜ ì‚¬ìš© 
                 if (!u) {
                     u = usb_open(dev);
                     if (!u) {
@@ -139,7 +138,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                 }
                 printf("hid interface (generic)\n");
                 
-                // »ç¿ëÇÒ ¼ö ÀÖ´ÂÁö È®ÀÎ
+                // ì‚¬ìš©í•  ìˆ˜ ìˆëŠ”ì§€ í™•ì¸
                 if (usb_get_driver_np(u, i, (char *)buf, sizeof(buf)) >= 0) {
                     printf("in use by driver \"%s\"\n", buf);
                     if (usb_detach_kernel_driver_np(u, i) < 0) {
@@ -152,7 +151,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                     continue;
                 }
                 
-                // USB descriptor Á¤º¸ ÀĞ±â
+                // USB descriptor ì •ë³´ ì½ê¸°
                 len = usb_control_msg(u, 0x81, 6, 0x2200, i, (char *)buf, sizeof(buf), 250);
                 printf("descriptor, len=%d\n", len);
                 if (len < 2) {
@@ -160,7 +159,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                     continue;
                 }
 
-                // »çÀü¿¡ ¼³Á¤ÇÑ Usage Page ¹× Usage ID¿Í ÀÏÄ¡ÇÏ´ÂÁö È®ÀÎ
+                // ì‚¬ì „ì— ì„¤ì •í•œ Usage Page ë° Usage IDì™€ ì¼ì¹˜í•˜ëŠ”ì§€ í™•ì¸
                 p = buf;
                 parsed_usage_page = buf[0] + (buf[1] << 8);
                 parsed_usage = buf[2] + (buf[3] << 8);
@@ -171,7 +170,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                         continue;
                 }
 
-                // HID °´Ã¼ ÃÊ±âÈ­
+                // HID ê°ì²´ ì´ˆê¸°í™”
                 hid = (struct hid_struct *)malloc(sizeof(struct hid_struct));
                 if (!hid) {
                     usb_release_interface(u, i);
@@ -194,9 +193,9 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
 }
 
 
-// rawhid_close(): HID ±â±â ÇÔ¼ö
-// ÀÔ·Â: USB ±â±â ¹øÈ£
-// Ãâ·Â: ¾øÀ½
+// rawhid_close(): HID ê¸°ê¸° í•¨ìˆ˜
+// ì…ë ¥: USB ê¸°ê¸° ë²ˆí˜¸
+// ì¶œë ¥: ì—†ìŒ
 void rawhid_close(int num)
 {
     hid_t *hid;
@@ -206,9 +205,9 @@ void rawhid_close(int num)
     hid_close(hid);
 }
 
-// add_hid(): ¿¬°á ¸®½ºÆ®¿¡ ÇÏ³ªÀÇ HID °´Ã¼ Ãß°¡
-// ÀÔ·Â: HID °´Ã¼
-// Ãâ·Â: ¾øÀ½
+// add_hid(): ì—°ê²° ë¦¬ìŠ¤íŠ¸ì— í•˜ë‚˜ì˜ HID ê°ì²´ ì¶”ê°€
+// ì…ë ¥: HID ê°ì²´
+// ì¶œë ¥: ì—†ìŒ
 static void add_hid(hid_t *h)
 {
     if (!first_hid || !last_hid) {
@@ -222,9 +221,9 @@ static void add_hid(hid_t *h)
     last_hid = h;
 }
 
-// get_hid(): ¹øÈ£·Î HID °´Ã¼ °¡Á®¿À±â
-// ÀÔ·Â: HID °´Ã¼ ¹øÈ£
-// Ãâ·Â: HID °´Ã¼
+// get_hid(): ë²ˆí˜¸ë¡œ HID ê°ì²´ ê°€ì ¸ì˜¤ê¸°
+// ì…ë ¥: HID ê°ì²´ ë²ˆí˜¸
+// ì¶œë ¥: HID ê°ì²´
 static hid_t* get_hid(int num)
 {
     hid_t *p;
@@ -232,9 +231,9 @@ static hid_t* get_hid(int num)
     return p;
 }
 
-// free_all_hid(): ¸ğµç HID °´Ã¼ ÇÒ´ç ÇØÁ¦
-// ÀÔ·Â: ¾øÀ½
-// Ãâ·Â: ¾øÀ½
+// free_all_hid(): ëª¨ë“  HID ê°ì²´ í• ë‹¹ í•´ì œ
+// ì…ë ¥: ì—†ìŒ
+// ì¶œë ¥: ì—†ìŒ
 static void free_all_hid(void)
 {
     hid_t *p, *q;
@@ -251,9 +250,9 @@ static void free_all_hid(void)
     first_hid = last_hid = NULL;
 }
 
-// hid_close(): Æ¯Á¤ HID °´Ã¼ ÇÒ´ç ÇØÁ¦
-// ÀÔ·Â: HID °´Ã¼
-// Ãâ·Â: ¾øÀ½
+// hid_close(): íŠ¹ì • HID ê°ì²´ í• ë‹¹ í•´ì œ
+// ì…ë ¥: HID ê°ì²´
+// ì¶œë ¥: ì—†ìŒ
 static void hid_close(hid_t *hid)
 {
     hid_t *p;

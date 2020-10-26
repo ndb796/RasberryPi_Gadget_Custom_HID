@@ -8,7 +8,7 @@
 int main()
 {
     int i, r, num;
-    char c, buf[64];
+    char buf[64];
 
     // 1D6B:0104:FFAB:7777
     r = rawhid_open(1, 0x1D6B, 0x0104, 0xFFAB, 0x7777);
@@ -22,7 +22,7 @@ int main()
     printf("found rawhid device\n");
 
     while (1) {
-        // Raw HID ÆĞÅ¶ÀÌ µµÂøÇß´ÂÁö È®ÀÎ 
+        // Raw HID íŒ¨í‚·ì´ ë„ì°©í–ˆëŠ”ì§€ í™•ì¸ 
         num = rawhid_recv(0, buf, 64, 220);
         if (num < 0) {
             printf("\nerror reading, device went offline\n");
@@ -36,11 +36,11 @@ int main()
                 if (i % 16 == 15 && i < num - 1) printf("\n");
             }
             printf("\n");
-            // Àü´Ş ¹ŞÀº ÀÌÈÄ¿¡ ÀÇ¹Ì ¾ø´Â 64 ¹ÙÀÌÆ® ÆĞÅ¶ Àü¼Û
-			for (i = 0; i < 64; i++) {
-				buf[i] = 'F';
-			}
-			rawhid_send(0, buf, 64, 100);
-        }
+            // ì „ë‹¬ ë°›ì€ ì´í›„ì— ì˜ë¯¸ ì—†ëŠ” 64 ë°”ì´íŠ¸ íŒ¨í‚· ì „ì†¡
+            for (i = 0; i < 64; i++) {
+                buf[i] = 'F';
+            }
+            rawhid_send(0, buf, 64, 100);
+            }
 	}
 }

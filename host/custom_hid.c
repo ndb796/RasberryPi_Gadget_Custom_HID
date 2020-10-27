@@ -41,6 +41,6 @@ int main()
                 buf[i] = 'F';
             }
             rawhid_send(0, buf, 64, 100);
-            }
-	}
+        }
+    }
 }

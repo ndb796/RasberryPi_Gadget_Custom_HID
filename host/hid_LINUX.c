@@ -138,7 +138,7 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                 }
                 printf("hid interface (generic)\n");
                 
-                // 사용할 수 있는지 확인
+                // 사용할 수 있는지 확인 (다른 드라이버가 사용 중이라면 detach 시도)
                 if (usb_get_driver_np(u, i, (char *)buf, sizeof(buf)) >= 0) {
                     printf("in use by driver \"%s\"\n", buf);
                     if (usb_detach_kernel_driver_np(u, i) < 0) {

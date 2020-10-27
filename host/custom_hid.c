@@ -11,9 +11,9 @@ int main()
     char buf[64];
 
     // 1D6B:0104:FFAB:7777
-    r = rawhid_open(1, 0x1D6B, 0x0104, 0xFFAB, 0x7777);
+    r = rawhid_open(1, 0x1D6B, 0x0104, 0xFF77, 0x0009);
     if (r <= 0) {
-        r = rawhid_open(1, 0x1D6B, 0x0104, 0xFFAB, 0x7777);
+        r = rawhid_open(1, 0x1D6B, 0x0104, 0xFF77, 0x0009);
         if (r <= 0) {
             printf("no rawhid device found\n");
             return -1;

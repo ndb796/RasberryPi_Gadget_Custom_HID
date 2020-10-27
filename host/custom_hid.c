@@ -10,7 +10,7 @@ int main()
     int i, r, num;
     char buf[64];
 
-    // 1D6B:0104:FFAB:7777
+    // 1D6B:0104:FF77:0009
     r = rawhid_open(1, 0x1D6B, 0x0104, 0xFF77, 0x0009);
     if (r <= 0) {
         r = rawhid_open(1, 0x1D6B, 0x0104, 0xFF77, 0x0009);

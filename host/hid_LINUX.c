@@ -160,8 +160,8 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
                 }
 
                 // 사전에 설정한 Usage Page 및 Usage ID와 일치하는지 확인
-                parsed_usage_page = buf[0] + (buf[1] << 8);
-                parsed_usage = buf[2] + (buf[3] << 8);
+                parsed_usage_page = buf[1] + (buf[2] << 8);
+                parsed_usage = buf[3] + (buf[4] << 8);
                 printf("parsed usage page = %d, parsed usage ID = %d\n", parsed_usage_page, parsed_usage);
                 if ((!parsed_usage_page) || (!parsed_usage) ||
                     (usage_page > 0 && parsed_usage_page != usage_page) || 

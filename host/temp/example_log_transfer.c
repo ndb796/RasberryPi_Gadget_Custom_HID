@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include "hid.h"
@@ -15,7 +16,7 @@ void val32_to_buf(char* buf, uint32_t val, uint32_t index) {
 
 int main()
 {
-    int i, r, num;
+    int r;
     char buf[64];
 
     // 1D6B:0104:FF77:0009
